@@ -1,0 +1,202 @@
+/* ----------------------User code--------------------*/
+
+package src;
+   
+/* ------------Grammar symbol declarations----------- */
+   
+terminal                PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN;
+terminal Double         NUMBER;
+non terminal Container  A, B, C, D, E, F, G, H;
+ 
+/* ------------Grammar rules----------- */
+
+A   ::= B:b 
+        {:  
+            RESULT = b;
+        :};
+   
+B   ::= B:b MINUS C:c
+        {:
+          Container container = new Container();  
+          container.setValue(b.getValue() - c.getValue());
+          container.setPrefix("- " + b.getPrefix() + " " + c.getPrefix());
+          container.setPostfix(b.getPostfix() + " " + c.getPostfix() + " -");
+          container.setIsInfix(true);
+          RESULT = container;
+        :}
+        |B:b PLUS C:c
+        {:
+          Container container = new Container();
+          container.setValue(b.getValue() + c.getValue());  
+          container.setPrefix("+ " + b.getPrefix() + " " + c.getPrefix());
+          container.setPostfix(b.getPostfix() + " " + c.getPostfix() + " +");
+          container.setIsInfix(true);
+          RESULT = container; 
+        :}
+        |C:c
+        {:
+            RESULT = c;
+        :};
+
+C   ::= C:c DIVIDE D:d
+        {:
+          Container container = new Container();  
+          container.setValue(c.getValue() / d.getValue());
+          container.setPrefix("/ " + c.getPrefix() + " " + d.getPrefix());
+          container.setPostfix(c.getPostfix() + " " + d.getPostfix() + " /");
+          container.setIsInfix(true);
+          RESULT = container;
+
+        :}
+        |C:c TIMES D:d
+        {:
+          Container container = new Container();
+          container.setValue(c.getValue() * d.getValue());  
+          container.setPrefix("* " + c.getPrefix() + " " + d.getPrefix());
+          container.setPostfix(c.getPostfix() +" " + d.getPostfix() + " *");
+          container.setIsInfix(true);
+          RESULT = container;
+        :}
+        |D:d
+        {:
+            RESULT = d;
+        :};
+
+D   ::=  LPAREN B:b RPAREN
+        {:
+            RESULT = b;
+        :} 
+        | NUMBER:num
+        {:
+            Container container = new Container();
+            container.setValue(num);
+            container.setPrefix(num.toString());
+            container.setPostfix(num.toString());
+            container.setIsInfix(true);
+            RESULT = container;
+        :};
+
+/* Postfix */
+A   ::= E:e
+        {:
+            RESULT = e;
+        :};
+
+E   ::= F:f1 F:f2 PLUS 
+        {:  
+            Container container = new Container();
+            container.setValue(f1.getValue()+f2.getValue());    
+            container.setPrefix("+ "+ f1.getPrefix() +" " + f2.getPrefix());
+            container.setInfix("( "+ f1.getInfix()+ " + " + f2.getInfix() +" )");
+            container.setIsPostfix(true);
+            RESULT = container;
+        :}
+        | F:f1 F:f2 MINUS
+        {:
+            Container container = new Container();
+            container.setValue(f1.getValue() - f2.getValue());
+            container.setPrefix("- " + f1.getPrefix() + " " + f2.getPrefix());
+            container.setInfix("( "+ f1.getInfix() + " - " + f2.getInfix() + " )");
+            container.setIsPostfix(true);
+            RESULT = container;
+        :}
+        | F:f1 F:f2 TIMES
+        {:
+            Container container = new Container();
+            container.setValue(f1.getValue() * f2.getValue());
+            container.setPrefix("* "+ f1.getPrefix() + " " + f2.getPrefix());
+            container.setInfix("( "+ f1.getInfix() + " * "+ f2.getInfix() + " )");
+            container.setIsPostfix(true);
+            RESULT = container;
+        :}
+        | F:f1 F:f2 DIVIDE
+        {:
+            Container container = new Container();
+            container.setValue(f1.getValue()/f2.getValue());
+            container.setPrefix("/ "+f1.getPrefix()+" "+f2.getPrefix());
+            container.setInfix("( "+ f1.getInfix()+ " / "+f2.getInfix()+ " )");
+            container.setIsPostfix(true);
+            RESULT = container;
+        :}
+       |LPAREN E:e RPAREN
+        {:
+            RESULT = e;
+        :} ;
+F   ::= E:e
+        {:
+          RESULT = e;
+        :};
+
+F  ::= NUMBER:num
+        {:  
+            Container container = new Container();      
+            container.setValue(num);
+            container.setPrefix(num.toString());
+            container.setInfix(num.toString());
+            container.setIsPostfix(true);
+            RESULT = container;
+        :};
+
+
+/* Prefix */
+A   ::= H:h
+        {:
+            RESULT = h;
+        :};
+
+H   ::= PLUS G:g1 G:g2 
+        {:  
+            Container container = new Container();
+            container.setValue(g1.getValue()+g2.getValue());
+            container.setPostfix(g1.getPostfix()+" "+g2.getPostfix()+ " +");
+            container.setInfix("( "+ g1.getInfix()+ " + "+g2.getInfix()+ " )");
+            container.setIsPrefix(true);
+            RESULT = container;
+        :}
+        | MINUS G:g1 G:g2 
+        {:
+            Container container = new Container();
+            container.setValue(g1.getValue()-g2.getValue());
+            container.setPostfix(g1.getPostfix()+" "+g2.getPostfix()+ " -");
+            container.setInfix("( "+ g1.getInfix()+ " - "+g2.getInfix()+ " )");
+            container.setIsPrefix(true);
+            RESULT = container;
+        :}
+        | TIMES G:g1 G:g2
+        {:
+            Container container = new Container();
+            container.setValue(g1.getValue()*g2.getValue());
+            container.setPostfix(g1.getPostfix()+" "+g2.getPostfix()+ " *");
+            container.setInfix("( "+ g1.getInfix()+ " * "+g2.getInfix()+ " )");
+            container.setIsPrefix(true);
+            RESULT = container;
+        :}
+        | DIVIDE G:g1 G:g2
+        {:
+            Container container = new Container();
+            container.setValue(g1.getValue()/g2.getValue());
+            container.setPostfix(g1.getPostfix()+" "+g2.getPostfix()+ " /");
+            container.setInfix("( "+ g1.getInfix()+ " / "+g2.getInfix()+ " )");
+            container.setIsPrefix(true);
+            RESULT =container;
+        :}
+        |LPAREN H:h RPAREN 
+        {:
+            RESULT = h;
+        :} ;
+
+G   ::= H:h
+        {:
+          RESULT = h;
+        :};
+
+G   ::= NUMBER:num
+        {:  
+          Container container = new Container();  
+          container.setValue(num);
+          container.setPostfix(num.toString());
+          container.setInfix(num.toString());
+          container.setIsPrefix(true);
+          RESULT = container;
+        :};
+        
