@@ -68,6 +68,7 @@ LineTerminator = \r|\n|\r\n
 
 WhiteSpace     = {LineTerminator} | [ \t\f]
 
+Variable       = x|y
 /* A literal integer is is a number beginning with a number between
    one and nine followed by zero or more numbers between zero and nine
    or just a zero.  */
@@ -91,10 +92,15 @@ num = {int}("."[0-9]+)?
     "/"        { System.out.print("<DIVIDE>"); return symbol(sym.DIVIDE); } 
     "("        { System.out.print("<LPAREN>"); return symbol(sym.LPAREN); } 
     ")"        { System.out.print("<RPAREN>"); return symbol(sym.RPAREN); } 
-
+    "="        { System.out.print("<ASSIGNER>"); return symbol(sym.ASSIGNER); } 
+    ";"        { System.out.print("<SEMI>"); return symbol(sym.SEMI); }
+  
     {num}      { System.out.print("<NUM," + yytext() + ">");return symbol(sym.NUMBER, new Double(yytext())); }
 
-    /* Don't do anything if whitespace is found */
+    {Variable}  { System.out.print("<VARIABLE," + yytext() + ">");
+return symbol(sym.VARIABLE, new String(yytext())); }
+    
+/* Don't do anything if whitespace is found */
 
     {WhiteSpace}       { /* just skip what was found, do nothing */ }
 

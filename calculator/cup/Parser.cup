@@ -1,20 +1,39 @@
 /* ----------------------User code--------------------*/
 
 package src;
-   
+import java.util.Hashtable;
+
+action code{:
+    Hashtable<String, Double> h = new Hashtable<String, Double>();
+:}
 /* ------------Grammar symbol declarations----------- */
    
-terminal                PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN;
+terminal                PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, ASSIGNER, SEMI;
+terminal String         VARIABLE;
 terminal Double         NUMBER;
-non terminal Container  A, B, C, D, E, F, G, H;
+non terminal Container  A, B, C, D, E, F, G, H, X;
  
+precedence left SEMI;
+
 /* ------------Grammar rules----------- */
 
 A   ::= B:b 
         {:  
             RESULT = b;
+        :}
+
+        |X:x SEMI B:b
+        {:
+            RESULT = b;
         :};
-   
+
+X   ::= X:x1 SEMI X:x2
+        {: :}
+        |VARIABLE:v ASSIGNER NUMBER:n
+         {:
+            h.put(v,n);
+        :};
+
 B   ::= B:b MINUS C:c
         {:
           Container container = new Container();  
@@ -66,18 +85,32 @@ D   ::=  LPAREN B:b RPAREN
         {:
             RESULT = b;
         :} 
-        | NUMBER:num
+        | NUMBER:n
         {:
             Container container = new Container();
-            container.setValue(num);
-            container.setPrefix(num.toString());
-            container.setPostfix(num.toString());
+            container.setValue(n);
+            container.setPrefix(n.toString());
+            container.setPostfix(n.toString());
+            container.setIsInfix(true);
+            RESULT = container;
+        :}
+        | VARIABLE:v
+        {:
+            Container container = new Container();
+            container.setValue(h.get(v));
+            container.setPrefix(v);
+            container.setPostfix(v);
             container.setIsInfix(true);
             RESULT = container;
         :};
 
 /* Postfix */
 A   ::= E:e
+        {:
+            RESULT = e;
+        :}
+        
+        |X:x SEMI E:e
         {:
             RESULT = e;
         :};
@@ -121,26 +154,40 @@ E   ::= F:f1 F:f2 PLUS
        |LPAREN E:e RPAREN
         {:
             RESULT = e;
-        :} ;
+        :};
 F   ::= E:e
         {:
           RESULT = e;
         :};
 
-F  ::= NUMBER:num
+F  ::= NUMBER:n
         {:  
             Container container = new Container();      
-            container.setValue(num);
-            container.setPrefix(num.toString());
-            container.setInfix(num.toString());
+            container.setValue(n);
+            container.setPrefix(n.toString());
+            container.setInfix(n.toString());
+            container.setIsPostfix(true);
+            RESULT = container;
+        :}
+        
+        | VARIABLE:v
+        {:
+            Container container = new Container();
+            container.setValue(h.get(v));
+            container.setPrefix(v);
+            container.setInfix(v);
             container.setIsPostfix(true);
             RESULT = container;
         :};
 
-
 /* Prefix */
 A   ::= H:h
         {:
+            RESULT = h;
+        :}
+    
+        |X:x SEMI H:h
+        {: 
             RESULT = h;
         :};
 
@@ -183,20 +230,28 @@ H   ::= PLUS G:g1 G:g2
         |LPAREN H:h RPAREN 
         {:
             RESULT = h;
-        :} ;
+        :};
 
 G   ::= H:h
         {:
           RESULT = h;
         :};
 
-G   ::= NUMBER:num
+G   ::= NUMBER:n
         {:  
           Container container = new Container();  
-          container.setValue(num);
-          container.setPostfix(num.toString());
-          container.setInfix(num.toString());
+          container.setValue(n);
+          container.setPostfix(n.toString());
+          container.setInfix(n.toString());
           container.setIsPrefix(true);
           RESULT = container;
+        :}
+        | VARIABLE:v
+        {:
+            Container container = new Container();
+            container.setValue(h.get(v));
+            container.setPostfix(v);
+            container.setInfix(v);
+            container.setIsPrefix(true);
+            RESULT = container;
         :};
-        
