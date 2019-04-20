@@ -74,7 +74,7 @@ Variable       = x|y
    or just a zero.  */
 
 int = 0 | [1-9][0-9]*
-num = {int}("."[0-9]+)?
+num = (-)?{int}("."[0-9]+)?
 
 
 %%
